@@ -1,5 +1,7 @@
-var express = require('express');
-var router = express.Router(); // 建立 Express Router 來管理路由
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+const bcrypt = require('bcrypt');
 
 // -----------------------
 // 顯示登入頁面（GET /login）
@@ -12,23 +14,38 @@ router.get('/', function(req, res, next) {
 // -----------------------
 // 處理登入請求（POST /login）
 // -----------------------
-router.post('/', function(req, res, next) {
-  console.log('收到 POST 請求:', req.body); // 印出表單資料，確保 Express 正確解析
 
-  const { username, password } = req.body; // 從請求中取得帳號與密碼
+router.post('/', async (req, res) => {
+  const { username, password } = req.body;
 
-  // 假設的帳號密碼（實際應用應從資料庫獲取）
-  const demoUser = { username: 'user1', password: 'password123' };
+  try {
+    // 從資料庫取得使用者
+    const user = await db('users').where({ username }).first();
 
-  // 驗證使用者輸入是否正確
-  if (username === demoUser.username && password === demoUser.password) {
-    res.send('登入成功！'); // 帳密正確，顯示成功訊息
-  } else {
-    res.render('login', { error: '使用者名稱或密碼錯誤' }); // 登入失敗，重新渲染頁面並顯示錯誤訊息
+    if (!user) {
+      return res.render('login', { error: '使用者名稱不存在' });
+    }
+
+    // 驗證密碼是否正確
+    const isValid = await bcrypt.compare(password, user.password);
+
+    if (!isValid) {
+      return res.render('login', { error: '密碼錯誤' });
+    }
+
+    // 登入成功 → 設定 session
+    req.session.user = {
+      id: user.id,
+      username: user.username
+    };
+
+    res.redirect('/dashboard');
+
+  } catch (err) {
+    console.error('登入錯誤:', err);
+    res.render('login', { error: '系統錯誤，請稍後再試' });
   }
 });
 
-// -----------------------
-// 匯出 router 供 `app.js` 使用
-// -----------------------
 module.exports = router;
+

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
-const bcrypt = require('bcrypt');
+const db = require('../db');     // 使用 knex
+const bcrypt = require('bcrypt'); // 密碼加密
 
 router.get('/', (req, res) => {
+  console.log('register route hit');
   res.render('register', { error: null });
 });
 

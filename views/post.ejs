@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>新增文章</title>
+</head>
+<body>
+  <h1>撰寫新文章</h1>
+
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+
+  <form action="/post" method="POST">
+    <div>
+      <label for="title">標題：</label>
+      <input type="text" id="title" name="title" required>
+    </div>
+    <div>
+      <label for="content">內容：</label>
+      <textarea id="content" name="content" rows="5" required></textarea>
+    </div>
+    <button type="submit">送出</button>
+  </form>
+
+  <p><a href="/dashboard">回到文章列表</a></p>
+</body>
+</html>
